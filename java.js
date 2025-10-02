@@ -148,3 +148,21 @@ function renderModal(data, term=''){
     </div>
   `;
 }
+const galleryModal = document.getElementById('galleryModal');
+  galleryModal.addEventListener('show.bs.modal', function (event) {
+    const trigger = event.relatedTarget;
+    const type = trigger.getAttribute('data-type');
+    const src = trigger.getAttribute('data-src');
+
+    const modalBody = galleryModal.querySelector('.modal-body');
+    modalBody.innerHTML = '';
+
+    if (type === 'image') {
+      modalBody.innerHTML = `<img src="${src}" class="img-fluid rounded">`;
+    } else if (type === 'video') {
+      modalBody.innerHTML = `
+        <video controls autoplay class="w-100 rounded">
+          <source src="${src}" type="video/mp4">
+        </video>`;
+    }
+  });
