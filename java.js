@@ -1,10 +1,11 @@
-
+// Utility functions
 function safeParse(str){ try{ return JSON.parse(str); }catch(e){ return []; } }
 function escapeHtml(s){ return String(s).replace(/[&<>"'`]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c])); }
 function highlight(text, term){ if(!term) return escapeHtml(text); try{ const re=new RegExp(term.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&'),'gi'); return escapeHtml(text).replace(re, m=>`<span class="highlight">${m}</span>`); }catch(e){ return escapeHtml(text);} }
 
+// Elements
 const podium = document.getElementById('podium');
-const cardEls = [...podium.querySelectorAll('.place')];
+let cardEls = [...podium.querySelectorAll('.place')];
 const modal = document.getElementById('modal');
 const teamNameEl = document.getElementById('team-name');
 const resultSections = document.getElementById('result-sections');
@@ -15,7 +16,7 @@ const topMeta = document.getElementById('top-meta');
 const topScore = document.getElementById('top-score');
 const topInitial = document.getElementById('top-initial');
 
-/* Compute team totals & decorate cards */
+// Compute team totals & reorder
 cardEls.forEach(card=>{
   const data = safeParse(card.dataset.results || "[]");
   const total = data.reduce((s,row)=> s + (parseInt(row[5],10)||0), 0);
@@ -26,15 +27,17 @@ cardEls.forEach((card, idx)=>{
   const rank = idx+1;
   const h2 = card.querySelector('h2');
   const badge = card.querySelector('.score-badge');
-  h2.textContent = rank <= 3 ? `🥇🥈🥉`.split('')[rank-1] : rank;
+  h2.textContent = rank;
   badge.textContent = `Total: ${card.dataset.total}`;
+  card.classList.remove('gold','silver','red','gray');
   if(rank===1) card.classList.add('gold');
   else if(rank===2) card.classList.add('silver');
   else if(rank===3) card.classList.add('red');
   else card.classList.add('gray');
+  podium.appendChild(card);
 });
 
-/* Modal logic */
+// Modal logic
 cardEls.forEach(card=>{
   card.addEventListener('click', ()=>{
     const team = card.dataset.team || 'Team';
@@ -53,7 +56,7 @@ document.getElementById('close').onclick = closeModal;
 modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
 function closeModal(){ modal.classList.remove('show'); topPerformerBox.classList.add('hidden'); document.removeEventListener('keydown', escClose); }
 
-/* Render modal contents */
+// Render modal
 function renderModal(data, term=''){
   const studentTotals = {};
   data.forEach(row=>{
@@ -148,21 +151,3 @@ function renderModal(data, term=''){
     </div>
   `;
 }
-const galleryModal = document.getElementById('galleryModal');
-  galleryModal.addEventListener('show.bs.modal', function (event) {
-    const trigger = event.relatedTarget;
-    const type = trigger.getAttribute('data-type');
-    const src = trigger.getAttribute('data-src');
-
-    const modalBody = galleryModal.querySelector('.modal-body');
-    modalBody.innerHTML = '';
-
-    if (type === 'image') {
-      modalBody.innerHTML = `<img src="${src}" class="img-fluid rounded">`;
-    } else if (type === 'video') {
-      modalBody.innerHTML = `
-        <video controls autoplay class="w-100 rounded">
-          <source src="${src}" type="video/mp4">
-        </video>`;
-    }
-  });
